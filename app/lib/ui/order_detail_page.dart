@@ -8,6 +8,7 @@ import '../util/format.dart';
 import '../util/l10n.dart';
 import 'order_form_page.dart';
 import 'widgets/common.dart';
+import 'widgets/invoice_action.dart';
 
 class OrderDetailPage extends StatefulWidget {
   const OrderDetailPage({super.key, required this.orderId});
@@ -56,6 +57,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     }
   }
 
+  bool _pdfBusy = false;
+
+  Future<void> _invoice() async {
+    setState(() => _pdfBusy = true);
+    try {
+      await shareInvoice(context, _order!);
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _pdfBusy = false);
+    }
+  }
+
   Future<void> _edit() async {
     final changed = await Navigator.push<bool>(context, MaterialPageRoute(builder: (_) => OrderFormPage(existing: _order)));
     if (changed == true) _load();
@@ -89,6 +103,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       appBar: AppBar(
         title: Text(o.orderNo),
         actions: [
+          IconButton(
+            onPressed: _pdfBusy ? null : _invoice,
+            icon: _pdfBusy
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.picture_as_pdf_outlined),
+            tooltip: t.invoicePdf,
+          ),
           if (canEdit) IconButton(onPressed: _busy ? null : _edit, icon: const Icon(Icons.edit), tooltip: t.edit),
           if (isAdmin)
             PopupMenuButton<String>(
@@ -112,8 +133,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               StatusChip(o.status),
             ]),
             const SizedBox(height: 12),
+            row(t.invoiceNo, '${o.invoiceNo}  ·  ${o.isGst ? t.categoryGst : t.categoryGeneral}'),
             row(t.dateTime, fmtDateTime(o.orderDatetime)),
             row(t.vehicle, o.vehicleDisplay ?? t.noVehicle),
+            row(t.driver, o.driverName ?? t.noDriver),
             row(t.orderTaker, o.createdByName ?? '—'),
             if (o.notes != null) row(t.notes, o.notes!),
             const Divider(height: 32),
@@ -124,9 +147,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(i.productName, style: theme.textTheme.titleMedium),
-                      Row(children: [
+                      Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
                         Text('${i.quantity} ${i.unit} × ${money(i.rate)}', style: theme.textTheme.bodyMedium),
-                        if (i.isDefaultRate) ...[
+                        if (i.isRateOverride)
+                          Pill(
+                              label: t.rateChangedFrom(money(i.standardRate ?? i.rate)),
+                              bg: Colors.purple.shade100,
+                              fg: Colors.purple.shade900),
+                        if (i.isDefaultRate && !i.isRateOverride) ...[
                           const SizedBox(width: 6),
                           Pill(label: t.defaultRate, bg: Colors.amber.shade100, fg: Colors.brown.shade800),
                         ],
@@ -137,10 +165,25 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 ]),
               ),
             const Divider(height: 24),
+            if (o.isGst || o.roundOff != 0) ...[
+              _amountRow(context, t.taxableValue, o.subtotal),
+              if (o.isGst) ...[
+                _amountRow(context, t.cgstAt(number(o.gstRate / 2)), o.cgstAmount),
+                _amountRow(context, t.sgstAt(number(o.gstRate / 2)), o.sgstAmount),
+              ],
+              if (o.roundOff != 0) _amountRow(context, t.roundOff, o.roundOff),
+              const SizedBox(height: 8),
+            ],
             Row(children: [
               Expanded(child: Text(t.totalItems(o.totalQuantity), style: theme.textTheme.titleMedium)),
               Text(money(o.totalAmount), style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
             ]),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: _pdfBusy ? null : _invoice,
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              label: Text(o.isGst ? t.downloadTaxInvoice : t.downloadInvoice),
+            ),
             const SizedBox(height: 24),
             Text(t.history, style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
@@ -165,4 +208,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       ),
     );
   }
+
+  Widget _amountRow(BuildContext context, String label, double v) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(children: [
+          Expanded(child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
+          Text(money(v), style: Theme.of(context).textTheme.bodyMedium),
+        ]),
+      );
 }

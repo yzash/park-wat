@@ -26,7 +26,7 @@ class ProductsPage extends StatelessWidget {
       onAdd: (c) => editProduct(c, null),
       tile: (c, p, reload) => ListTile(
         title: Row(children: [Flexible(child: Text(p.name)), if (!p.isActive) ...[const SizedBox(width: 8), const InactiveTag()]]),
-        subtitle: Text('${t.unit}: ${p.unit}'),
+        subtitle: Text('${t.unit}: ${p.unit}${p.hsnCode == null ? '' : ' · HSN ${p.hsnCode}'}'),
         trailing: Text(money(p.defaultRate), style: Theme.of(c).textTheme.titleMedium),
         onTap: () async {
           if (await editProduct(c, p) == true) reload();
@@ -41,6 +41,7 @@ Future<bool?> editProduct(BuildContext context, Product? p) {
   final name = TextEditingController(text: p?.name);
   final unit = TextEditingController(text: p?.unit);
   final rate = TextEditingController(text: p == null ? '' : p.defaultRate.toStringAsFixed(2));
+  final hsn = TextEditingController(text: p?.hsnCode);
   var active = p?.isActive ?? true;
   final form = GlobalKey<FormState>();
   var busy = false;
@@ -69,6 +70,12 @@ Future<bool?> editProduct(BuildContext context, Product? p) {
                 decoration: InputDecoration(labelText: t.defaultRate, helperText: t.defaultRateHelp, prefixText: '₹ '),
                 validator: (v) => double.tryParse(v ?? '') == null ? t.required : null,
               ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: hsn,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: t.hsnCode, helperText: t.hsnHelp),
+              ),
               SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(t.active), value: active, onChanged: (v) => setS(() => active = v)),
             ]),
           ),
@@ -83,7 +90,7 @@ Future<bool?> editProduct(BuildContext context, Product? p) {
                     setS(() => busy = true);
                     try {
                       await c.read<Api>().saveProduct(
-                          id: p?.id, name: name.text, unit: unit.text, defaultRate: double.parse(rate.text), isActive: active);
+                          id: p?.id, name: name.text, unit: unit.text, defaultRate: double.parse(rate.text), hsnCode: hsn.text, isActive: active);
                       if (c.mounted) Navigator.pop(c, true);
                     } catch (e) {
                       if (c.mounted) showError(c, e);

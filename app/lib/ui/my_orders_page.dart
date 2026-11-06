@@ -208,12 +208,25 @@ class _OrderTile extends StatelessWidget {
               Text(order.productsSummary!, style: theme.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 6),
             Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              Text('${order.orderNo} · ${fmtTime(order.orderDatetime)}', style: theme.textTheme.bodySmall),
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.schedule, size: 14),
+                const SizedBox(width: 2),
+                Text(fmtDateTimeShort(order.orderDatetime), style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+              ]),
+              Text('${t.invoiceShort} ${order.invoiceNo}', style: theme.textTheme.bodySmall),
               Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.local_shipping_outlined, size: 14),
                 const SizedBox(width: 2),
                 Text(order.vehicleNumber ?? t.noVehicle, style: theme.textTheme.bodySmall),
               ]),
+              if (order.driverName != null)
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.badge_outlined, size: 14),
+                  const SizedBox(width: 2),
+                  Text(order.driverName!, style: theme.textTheme.bodySmall),
+                ]),
+              CategoryChip(gst: order.isGst),
+              if (order.hasRateOverride) const RateChangedChip(),
               StatusChip(order.status),
             ]),
           ]),
@@ -251,7 +264,9 @@ class _PendingTile extends StatelessWidget {
           Row(children: [
             PendingBadge(failed: failed),
             const SizedBox(width: 8),
-            Text(fmtTime(order.orderDatetime), style: theme.textTheme.bodySmall),
+            CategoryChip(gst: order.invoiceCategory == InvoiceCategory.gst),
+            const SizedBox(width: 8),
+            Text(fmtDateTimeShort(order.orderDatetime), style: theme.textTheme.bodySmall),
             const Spacer(),
             if (failed) ...[
               TextButton(onPressed: () => sync.retry(order.id), child: Text(t.retry)),

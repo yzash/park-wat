@@ -35,3 +35,11 @@ insert into public.party_rates (party_id, product_id, rate, effective_from) valu
   ('33333333-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 52.00,  '2026-01-01'),
   ('33333333-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 54.00,  '2026-10-01'),
   ('33333333-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000003', 130.00, '2026-01-01');
+
+update public.products set hsn_code = '22011010';
+update public.parties set gstin = '24AADCR4532Q1Z2', address = E'NEAR RAILWAY CROSSING,\nGANDHIDHAM'
+ where id = '33333333-0000-0000-0000-000000000003';
+
+insert into public.drivers (id, name, phone) values
+  ('44444444-0000-0000-0000-000000000001', 'Ramesh Bhai', '9825100001'),
+  ('44444444-0000-0000-0000-000000000002', 'Suresh Kumar', '9825100002');

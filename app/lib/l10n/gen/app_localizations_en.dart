@@ -173,7 +173,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importIntro =>
-      'Upload an Excel file with a \"Parties\" sheet (Name, Contact Name, Phone, Address) and/or a \"Rates\" sheet (Party Name, Product Name, Rate, Effective From). Existing parties are matched by name and updated; rates are added with their effective date.';
+      'Upload an Excel file with a \"Parties\" sheet (Name, Contact Name, Phone, Address, GSTIN) and/or a \"Rates\" sheet (Party Name, Product Name, Rate, Effective From). Existing parties are matched by name and updated; rates are added with their effective date.';
 
   @override
   String get importNow => 'Import';
@@ -617,4 +617,177 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get increase => 'Increase';
+
+  @override
+  String get addDriver => 'Add driver';
+
+  @override
+  String get editDriver => 'Edit driver';
+
+  @override
+  String get drivers => 'Drivers';
+
+  @override
+  String get driversHelp => 'Driver list for the order form';
+
+  @override
+  String get driver => 'Driver';
+
+  @override
+  String get noDriver => 'No driver';
+
+  @override
+  String get selectDriver => 'Select driver';
+
+  @override
+  String get errDriverRequired => 'Choose a driver (or No driver)';
+
+  @override
+  String get invoiceType => 'Invoice type';
+
+  @override
+  String get categoryGeneral => 'General';
+
+  @override
+  String get categoryGst => 'GST';
+
+  @override
+  String get invoiceTypeFixed =>
+      'Invoice type can\'t be changed after the order is submitted.';
+
+  @override
+  String get changeRate => 'Change rate';
+
+  @override
+  String get useListRate => 'Use list rate';
+
+  @override
+  String get rateChanged => 'Rate changed';
+
+  @override
+  String get gst => 'GST';
+
+  @override
+  String get invoiceNo => 'Invoice no';
+
+  @override
+  String get invoiceShort => 'Inv';
+
+  @override
+  String get invoicePdf => 'Invoice PDF';
+
+  @override
+  String get downloadInvoice => 'Invoice PDF';
+
+  @override
+  String get downloadTaxInvoice => 'Tax invoice PDF';
+
+  @override
+  String get taxableValue => 'Taxable value';
+
+  @override
+  String get roundOff => 'Round off';
+
+  @override
+  String get invoiceSettings => 'Invoice settings';
+
+  @override
+  String get invoiceSettingsHelp =>
+      'Company details, GST rate, invoice number series';
+
+  @override
+  String get companyDetails => 'Company details (printed on invoices)';
+
+  @override
+  String get companyNameLabel => 'Company name';
+
+  @override
+  String get gstin => 'GSTIN';
+
+  @override
+  String get pan => 'PAN';
+
+  @override
+  String get jurisdiction => 'Jurisdiction (city)';
+
+  @override
+  String get gstInvoices => 'GST invoices';
+
+  @override
+  String get generalInvoices => 'General invoices';
+
+  @override
+  String get gstRatePercent => 'GST rate';
+
+  @override
+  String get gstRateHelp => 'Split equally into CGST and SGST';
+
+  @override
+  String get seriesFormat => 'Number format';
+
+  @override
+  String get seriesFormatHelp =>
+      '{n} = number, {fy} = financial year (26-27), {yyyy} = year';
+
+  @override
+  String get nextNumber => 'Next number';
+
+  @override
+  String get formatNeedsN => 'Must contain {n}';
+
+  @override
+  String get seriesNote =>
+      'Numbers are given out in order when orders reach the server. Set the next number to continue an existing invoice book.';
+
+  @override
+  String get hsnCode => 'HSN code (optional)';
+
+  @override
+  String get hsnHelp => 'Printed on GST invoices';
+
+  @override
+  String get gstinOptional => 'GSTIN (optional)';
+
+  @override
+  String get gstinHelp =>
+      'Printed on GST invoices; state is taken from the first two digits';
+
+  @override
+  String get gstinInvalid =>
+      '15 characters, starting with the 2-digit state code';
+
+  @override
+  String categoryGstWithRate(String rate) {
+    return 'GST $rate%';
+  }
+
+  @override
+  String listRateIs(String rate) {
+    return 'List rate $rate';
+  }
+
+  @override
+  String rateChangedFrom(String rate) {
+    return 'Changed from $rate';
+  }
+
+  @override
+  String invoiceNoIs(String no) {
+    return 'Invoice $no';
+  }
+
+  @override
+  String cgstAt(String rate) {
+    return 'CGST @ $rate%';
+  }
+
+  @override
+  String sgstAt(String rate) {
+    return 'SGST @ $rate%';
+  }
+
+  @override
+  String nextInvoiceWillBe(String no) {
+    return 'Next invoice: $no';
+  }
 }

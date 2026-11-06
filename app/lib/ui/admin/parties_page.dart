@@ -21,12 +21,12 @@ class PartiesPage extends StatelessWidget {
       addLabel: t.addParty,
       load: context.read<Api>().parties,
       isActive: (p) => p.isActive,
-      searchText: (p) => '${p.name} ${p.contactName ?? ''} ${p.phone ?? ''} ${p.address ?? ''}',
+      searchText: (p) => '${p.name} ${p.contactName ?? ''} ${p.phone ?? ''} ${p.address ?? ''} ${p.gstin ?? ''}',
       onAdd: (c) => Navigator.push<bool>(c, MaterialPageRoute(builder: (_) => const PartyDetailPage())),
       tile: (c, p, reload) => ListTile(
         leading: const Icon(Icons.storefront_outlined),
         title: Row(children: [Flexible(child: Text(p.name)), if (!p.isActive) ...[const SizedBox(width: 8), const InactiveTag()]]),
-        subtitle: Text([p.contactName, p.phone, p.address].whereType<String>().join(' · ')),
+        subtitle: Text([p.contactName, p.phone, p.gstin, p.address].whereType<String>().join(' · ')),
         trailing: const Icon(Icons.chevron_right),
         onTap: () async {
           await Navigator.push(c, MaterialPageRoute(builder: (_) => PartyDetailPage(party: p)));
@@ -52,6 +52,7 @@ class _PartyDetailPageState extends State<PartyDetailPage> {
   late final _contact = TextEditingController(text: widget.party?.contactName);
   late final _phone = TextEditingController(text: widget.party?.phone);
   late final _address = TextEditingController(text: widget.party?.address);
+  late final _gstin = TextEditingController(text: widget.party?.gstin);
   late bool _active = widget.party?.isActive ?? true;
   bool _busy = false;
 
@@ -66,7 +67,7 @@ class _PartyDetailPageState extends State<PartyDetailPage> {
     setState(() => _busy = true);
     try {
       final p = await context.read<Api>().saveParty(
-          id: _party?.id, name: _name.text, contactName: _contact.text, phone: _phone.text, address: _address.text, isActive: _active);
+          id: _party?.id, name: _name.text, contactName: _contact.text, phone: _phone.text, address: _address.text, gstin: _gstin.text, isActive: _active);
       if (!mounted) return;
       final wasNew = _party == null;
       setState(() => _party = p);
@@ -93,6 +94,18 @@ class _PartyDetailPageState extends State<PartyDetailPage> {
           TextFormField(controller: _phone, keyboardType: TextInputType.phone, decoration: InputDecoration(labelText: t.phone)),
           const SizedBox(height: 12),
           TextFormField(controller: _address, minLines: 2, maxLines: 4, decoration: InputDecoration(labelText: t.address)),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _gstin,
+            textCapitalization: TextCapitalization.characters,
+            maxLength: 15,
+            decoration: InputDecoration(labelText: t.gstinOptional, helperText: t.gstinHelp),
+            validator: (v) {
+              final x = (v ?? '').trim().toUpperCase();
+              if (x.isEmpty) return null;
+              return RegExp(r'^[0-9]{2}[A-Z0-9]{13}$').hasMatch(x) ? null : t.gstinInvalid;
+            },
+          ),
           SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(t.active), value: _active, onChanged: (v) => setState(() => _active = v)),
           const SizedBox(height: 12),
           FilledButton(onPressed: _busy ? null : _save, child: Text(t.save)),

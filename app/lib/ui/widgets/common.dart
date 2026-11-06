@@ -80,6 +80,22 @@ class Pill extends StatelessWidget {
       );
 }
 
+class CategoryChip extends StatelessWidget {
+  const CategoryChip({super.key, required this.gst});
+  final bool gst;
+  @override
+  Widget build(BuildContext context) => gst
+      ? Pill(label: context.t.categoryGst, bg: Colors.teal.shade100, fg: Colors.teal.shade900)
+      : Pill(label: context.t.categoryGeneral, bg: Colors.grey.shade200, fg: Colors.grey.shade800);
+}
+
+class RateChangedChip extends StatelessWidget {
+  const RateChangedChip({super.key});
+  @override
+  Widget build(BuildContext context) =>
+      Pill(label: context.t.rateChanged, bg: Colors.purple.shade100, fg: Colors.purple.shade900);
+}
+
 class PendingBadge extends StatelessWidget {
   const PendingBadge({super.key, this.failed = false});
   final bool failed;

@@ -61,8 +61,8 @@ class SyncState extends ChangeNotifier {
   }
 
   /// Queues the order and tries to send it right away.
-  /// Returns the order number if it reached the server, null if it stays queued.
-  Future<String?> submit(PendingOrder o) async {
+  /// Returns the order and invoice numbers if it reached the server, null if it stays queued.
+  Future<({String orderNo, String invoiceNo})?> submit(PendingOrder o) async {
     pending = [...pending, o];
     await _save();
     await syncNow();
@@ -74,7 +74,7 @@ class SyncState extends ChangeNotifier {
     return _lastOrderNos[o.id];
   }
 
-  final Map<String, String> _lastOrderNos = {};
+  final Map<String, ({String orderNo, String invoiceNo})> _lastOrderNos = {};
 
   Future<void> syncNow() async {
     if (syncing || _uid == null || pending.isEmpty) return;
@@ -86,7 +86,7 @@ class SyncState extends ChangeNotifier {
         try {
           final res = await _api.submitOrder(o);
           final no = res['order_no'] as String;
-          _lastOrderNos[o.id] = no;
+          _lastOrderNos[o.id] = (orderNo: no, invoiceNo: res['invoice_no'] as String? ?? '');
           pending = pending.where((p) => p.id != o.id).toList();
           await _save();
           _synced.add((id: o.id, orderNo: no));

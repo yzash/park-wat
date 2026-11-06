@@ -13,6 +13,7 @@ DateTime toPlant(DateTime utc) => utc.toUtc().add(AppConfig.plantUtcOffset);
 
 String fmtDateTime(DateTime utc) => DateFormat('dd MMM yyyy, hh:mm a').format(toPlant(utc));
 String fmtTime(DateTime utc) => DateFormat('hh:mm a').format(toPlant(utc));
+String fmtDateTimeShort(DateTime utc) => DateFormat('dd MMM, hh:mm a').format(toPlant(utc));
 String fmtDate(DateTime d) => DateFormat('dd MMM yyyy').format(d);
 String fmtShortDate(DateTime d) => DateFormat('dd MMM').format(d);
 

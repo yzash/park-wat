@@ -15,6 +15,8 @@ const P = { jar: "11111111-0000-0000-0000-000000000001", l1: "11111111-0000-0000
   ml500: "11111111-0000-0000-0000-000000000003", cup: "11111111-0000-0000-0000-000000000005" };
 const PARTY = { ganesh: "33333333-0000-0000-0000-000000000001", cityMart: "33333333-0000-0000-0000-000000000004" };
 const VEH = "22222222-0000-0000-0000-000000000001";
+const DRV = "44444444-0000-0000-0000-000000000001";
+const HOTEL = "33333333-0000-0000-0000-000000000003";
 
 async function login(userId, password) {
   const c = createClient(URL, ANON, { auth: { persistSession: false } });
@@ -56,7 +58,7 @@ let raviOrder;
 test("submit order: rates from party list, default fallback, totals, order no", async () => {
   const id = randomUUID();
   const { data, error } = await ravi.c.rpc("submit_order", {
-    p_id: id, p_party_id: PARTY.ganesh, p_vehicle_id: VEH, p_notes: " gate 2 ",
+    p_id: id, p_party_id: PARTY.ganesh, p_vehicle_id: VEH, p_driver_id: DRV, p_invoice_category: 'general', p_notes: " gate 2 ",
     p_items: [{ product_id: P.jar, quantity: 10 }, { product_id: P.cup, quantity: 2 }],
   });
   assert.ifError(error);
@@ -73,7 +75,7 @@ test("submit order: rates from party list, default fallback, totals, order no", 
 
 test("submit is idempotent (offline retry)", async () => {
   const { data, error } = await ravi.c.rpc("submit_order", {
-    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_notes: null,
+    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_driver_id: null, p_invoice_category: 'general', p_notes: null,
     p_items: [{ product_id: P.jar, quantity: 99 }],
   });
   assert.ifError(error);
@@ -89,7 +91,7 @@ test("validation: duplicates, zero qty, fractional qty, empty", async () => {
     [],
   ]) {
     const { error } = await ravi.c.rpc("submit_order", {
-      p_id: randomUUID(), p_party_id: PARTY.ganesh, p_vehicle_id: null, p_notes: null, p_items: items,
+      p_id: randomUUID(), p_party_id: PARTY.ganesh, p_vehicle_id: null, p_driver_id: null, p_invoice_category: 'general', p_notes: null, p_items: items,
     });
     assert.ok(error, JSON.stringify(items));
   }
@@ -97,7 +99,7 @@ test("validation: duplicates, zero qty, fractional qty, empty", async () => {
 
 test("future-dated client time is clamped; latest effective rate wins", async () => {
   const { data, error } = await sunil.c.rpc("submit_order", {
-    p_id: randomUUID(), p_party_id: PARTY.cityMart, p_vehicle_id: null, p_notes: null,
+    p_id: randomUUID(), p_party_id: PARTY.cityMart, p_vehicle_id: null, p_driver_id: null, p_invoice_category: 'general', p_notes: null,
     p_items: [{ product_id: P.jar, quantity: 1 }], p_order_datetime: "2099-01-01T00:00:00Z",
   });
   assert.ifError(error);
@@ -116,11 +118,11 @@ test("order taker sees only own orders", async () => {
 test("other taker cannot edit; owner can edit while Submitted; rates kept", async () => {
   const items = [{ product_id: P.jar, quantity: 20 }, { product_id: P.l1, quantity: 1 }];
   const { error: e1 } = await sunil.c.rpc("update_order", {
-    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_notes: null, p_items: items,
+    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_driver_id: null, p_notes: null, p_items: items,
   });
   assert.ok(e1);
   const { data, error } = await ravi.c.rpc("update_order", {
-    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_notes: "edited", p_items: items,
+    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_driver_id: null, p_notes: "edited", p_items: items,
   });
   assert.ifError(error);
   assert.equal(Number(data.total_amount), 20 * 50 + 105);
@@ -137,7 +139,7 @@ test("status: only admin; logged; taker cannot edit afterwards", async () => {
   assert.deepEqual(log.map((l) => l.to_status), ["Submitted", "Delivered"]);
   assert.equal(log[1].changed_by, admin.uid);
   const { error: e2 } = await ravi.c.rpc("update_order", {
-    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_notes: null,
+    p_id: raviOrder.id, p_party_id: PARTY.ganesh, p_vehicle_id: null, p_driver_id: null, p_notes: null,
     p_items: [{ product_id: P.jar, quantity: 1 }],
   });
   assert.ok(e2);
@@ -228,4 +230,96 @@ test("export-orders returns an xlsx with both sheets", async () => {
   const s = buf.toString("latin1");
   assert.ok(Number(r.headers.get("x-order-count")) >= 2);
   assert.ok(s.includes("xl/worksheets/sheet2.xml"));
+});
+
+// ---- v1.1: drivers, rate override, invoice categories ------------------------
+const submit = (who, extra) => who.c.rpc("submit_order", {
+  p_id: randomUUID(), p_party_id: HOTEL, p_vehicle_id: VEH, p_driver_id: DRV, p_invoice_category: "general",
+  p_notes: null, p_items: [{ product_id: P.jar, quantity: 1 }], ...extra,
+});
+
+test("settings: everyone reads, only admin writes", async () => {
+  const { data } = await ravi.c.from("app_settings").select("*").single();
+  assert.equal(Number(data.gst_rate), 5);
+  const { data: upd } = await ravi.c.from("app_settings").update({ gst_next_no: 1 }).eq("id", 1).select();
+  assert.equal(upd.length, 0);
+  const { error } = await admin.c.from("app_settings").update({ gst_next_no: 1263 }).eq("id", 1);
+  assert.ifError(error);
+});
+
+let gstOrder;
+test("GST order: override rate, 2.5% + 2.5%, round off, series from admin start point", async () => {
+  const { data, error } = await submit(ravi, {
+    p_invoice_category: "gst", p_items: [{ product_id: P.jar, quantity: 150, rate: 111 }],
+  });
+  assert.ifError(error);
+  gstOrder = data;
+  assert.match(data.invoice_no, /^1263\/PWP\/\d\d-\d\d$/);
+  assert.equal(Number(data.subtotal), 16650);
+  assert.equal(Number(data.cgst_amount), 416.25);
+  assert.equal(Number(data.sgst_amount), 416.25);
+  assert.equal(Number(data.round_off), 0.5);
+  assert.equal(Number(data.total_amount), 17483);
+  assert.equal(data.has_rate_override, true);
+  assert.equal(data.driver_id, DRV);
+  const { data: item } = await ravi.c.from("order_items").select("*").eq("order_id", data.id).single();
+  assert.equal(Number(item.standard_rate), 55);
+  assert.equal(item.is_rate_override, true);
+  const { data: next } = await submit(sunil, { p_invoice_category: "gst" });
+  assert.match(next.invoice_no, /^1264\/PWP\//);
+});
+
+test("General series is separate, sequential, no tax", async () => {
+  const { data: a } = await submit(ravi, {});
+  const { data: b } = await submit(ravi, {});
+  assert.match(a.invoice_no, /^\d+$/);
+  assert.equal(Number(b.invoice_no), Number(a.invoice_no) + 1);
+  assert.equal(Number(a.cgst_amount), 0);
+  assert.equal(Number(a.total_amount), 55);
+  assert.equal(a.has_rate_override, false);
+});
+
+test("invalid override rate rejected; unknown category rejected", async () => {
+  let { error } = await submit(ravi, { p_items: [{ product_id: P.jar, quantity: 1, rate: "-5" }] });
+  assert.ok(error);
+  ({ error } = await submit(ravi, { p_items: [{ product_id: P.jar, quantity: 1, rate: "1.234" }] }));
+  assert.ok(error);
+  ({ error } = await submit(ravi, { p_invoice_category: "other" }));
+  assert.ok(error);
+});
+
+test("edit keeps override unless reset; category and invoice no fixed; GST recalculated", async () => {
+  let { data, error } = await ravi.c.rpc("update_order", {
+    p_id: gstOrder.id, p_party_id: HOTEL, p_vehicle_id: null, p_driver_id: null, p_notes: null,
+    p_items: [{ product_id: P.jar, quantity: 100 }],
+  });
+  assert.ifError(error);
+  assert.equal(Number(data.subtotal), 11100); // kept 111
+  assert.equal(Number(data.total_amount), 11655);
+  assert.equal(data.invoice_no, gstOrder.invoice_no);
+  assert.equal(data.invoice_category, "gst");
+  ({ data } = await ravi.c.rpc("update_order", {
+    p_id: gstOrder.id, p_party_id: HOTEL, p_vehicle_id: null, p_driver_id: DRV, p_notes: null,
+    p_items: [{ product_id: P.jar, quantity: 100, rate: 55 }],
+  }));
+  assert.equal(data.has_rate_override, false);
+  assert.equal(Number(data.total_amount), Math.round(5500 * 1.05));
+});
+
+test("filters and totals by driver and category; override flag filter", async () => {
+  const { data: byDrv } = await admin.c.rpc("search_orders", { p_filters: { driver_ids: [DRV] } });
+  assert.ok(byDrv.length >= 3 && byDrv.every((o) => o.driver_id === DRV && o.driver_name === "Ramesh Bhai"));
+  const { data: none } = await admin.c.rpc("search_orders", { p_filters: { driver_ids: ["none"] } });
+  assert.ok(none.every((o) => o.driver_id === null));
+  const { data: gst } = await admin.c.rpc("search_orders", { p_filters: { categories: ["gst"] } });
+  assert.ok(gst.length >= 2 && gst.every((o) => o.invoice_category === "gst"));
+  const { data: inv } = await admin.c.rpc("search_orders", { p_filters: { search: "1264/PWP" } });
+  assert.equal(inv.length, 1);
+  for (const g of ["driver", "category"]) {
+    const { data, error } = await admin.c.rpc("order_totals", { p_group_by: g, p_filters: {} });
+    assert.ifError(error);
+    assert.ok(data.length >= 1);
+  }
+  const { data: lines } = await admin.c.rpc("search_order_lines", { p_filters: { categories: ["gst"] } });
+  assert.ok(lines.every((l) => l.hsn_code === "22011010"));
 });

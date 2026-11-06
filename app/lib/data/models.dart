@@ -10,6 +10,11 @@ class Roles {
   static const orderTaker = 'order_taker';
 }
 
+class InvoiceCategory {
+  static const general = 'general';
+  static const gst = 'gst';
+}
+
 class OrderStatus {
   static const submitted = 'Submitted';
   static const delivered = 'Delivered';
@@ -67,20 +72,22 @@ class Product {
   final String name;
   final String unit;
   final double defaultRate;
+  final String? hsnCode;
   final bool isActive;
 
-  const Product({required this.id, required this.name, required this.unit, required this.defaultRate, required this.isActive});
+  const Product({required this.id, required this.name, required this.unit, required this.defaultRate, this.hsnCode, required this.isActive});
 
   factory Product.fromJson(Map<String, dynamic> j) => Product(
         id: j['id'] as String,
         name: j['name'] as String,
         unit: j['unit'] as String,
         defaultRate: _d(j['default_rate']),
+        hsnCode: j['hsn_code'] as String?,
         isActive: j['is_active'] as bool? ?? true,
       );
 
   Map<String, dynamic> toJson() =>
-      {'id': id, 'name': name, 'unit': unit, 'default_rate': defaultRate, 'is_active': isActive};
+      {'id': id, 'name': name, 'unit': unit, 'default_rate': defaultRate, 'hsn_code': hsnCode, 'is_active': isActive};
 }
 
 class Vehicle {
@@ -103,15 +110,100 @@ class Vehicle {
   Map<String, dynamic> toJson() => {'id': id, 'vehicle_number': vehicleNumber, 'label': label, 'is_active': isActive};
 }
 
+class Driver {
+  final String id;
+  final String name;
+  final String? phone;
+  final bool isActive;
+
+  const Driver({required this.id, required this.name, this.phone, required this.isActive});
+
+  factory Driver.fromJson(Map<String, dynamic> j) => Driver(
+        id: j['id'] as String,
+        name: j['name'] as String,
+        phone: j['phone'] as String?,
+        isActive: j['is_active'] as bool? ?? true,
+      );
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'phone': phone, 'is_active': isActive};
+}
+
+/// Company details and invoice series (single row in app_settings).
+class AppSettings {
+  final String companyName;
+  final String? companyAddress;
+  final String? companyGstin;
+  final String? companyPan;
+  final String? companyPhone;
+  final String? jurisdiction;
+  final double gstRate;
+  final String gstInvoiceFormat;
+  final int gstNextNo;
+  final String generalInvoiceFormat;
+  final int generalNextNo;
+
+  const AppSettings({
+    required this.companyName,
+    this.companyAddress,
+    this.companyGstin,
+    this.companyPan,
+    this.companyPhone,
+    this.jurisdiction,
+    required this.gstRate,
+    required this.gstInvoiceFormat,
+    required this.gstNextNo,
+    required this.generalInvoiceFormat,
+    required this.generalNextNo,
+  });
+
+  static const fallback = AppSettings(
+    companyName: 'PARKAR WATER PRODUCTS',
+    gstRate: 5,
+    gstInvoiceFormat: '{n}/PWP/{fy}',
+    gstNextNo: 1,
+    generalInvoiceFormat: '{n}',
+    generalNextNo: 1,
+  );
+
+  factory AppSettings.fromJson(Map<String, dynamic> j) => AppSettings(
+        companyName: j['company_name'] as String,
+        companyAddress: j['company_address'] as String?,
+        companyGstin: j['company_gstin'] as String?,
+        companyPan: j['company_pan'] as String?,
+        companyPhone: j['company_phone'] as String?,
+        jurisdiction: j['jurisdiction'] as String?,
+        gstRate: _d(j['gst_rate']),
+        gstInvoiceFormat: j['gst_invoice_format'] as String,
+        gstNextNo: _i(j['gst_next_no']),
+        generalInvoiceFormat: j['general_invoice_format'] as String,
+        generalNextNo: _i(j['general_next_no']),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'company_name': companyName,
+        'company_address': companyAddress,
+        'company_gstin': companyGstin,
+        'company_pan': companyPan,
+        'company_phone': companyPhone,
+        'jurisdiction': jurisdiction,
+        'gst_rate': gstRate,
+        'gst_invoice_format': gstInvoiceFormat,
+        'gst_next_no': gstNextNo,
+        'general_invoice_format': generalInvoiceFormat,
+        'general_next_no': generalNextNo,
+      };
+}
+
 class Party {
   final String id;
   final String name;
   final String? contactName;
   final String? phone;
   final String? address;
+  final String? gstin;
   final bool isActive;
 
-  const Party({required this.id, required this.name, this.contactName, this.phone, this.address, required this.isActive});
+  const Party({required this.id, required this.name, this.contactName, this.phone, this.address, this.gstin, required this.isActive});
 
   factory Party.fromJson(Map<String, dynamic> j) => Party(
         id: j['id'] as String,
@@ -119,6 +211,7 @@ class Party {
         contactName: j['contact_name'] as String?,
         phone: j['phone'] as String?,
         address: j['address'] as String?,
+        gstin: j['gstin'] as String?,
         isActive: j['is_active'] as bool? ?? true,
       );
 
@@ -128,6 +221,7 @@ class Party {
         'contact_name': contactName,
         'phone': phone,
         'address': address,
+        'gstin': gstin,
         'is_active': isActive,
       };
 }
@@ -173,11 +267,14 @@ class PartyRate {
 class OrderLineInput {
   final String productId;
   final int quantity;
-  const OrderLineInput(this.productId, this.quantity);
 
-  Map<String, dynamic> toJson() => {'product_id': productId, 'quantity': quantity};
+  /// Set only when the order taker overrode the rate.
+  final double? rate;
+  const OrderLineInput(this.productId, this.quantity, {this.rate});
+
+  Map<String, dynamic> toJson() => {'product_id': productId, 'quantity': quantity, if (rate != null) 'rate': rate};
   factory OrderLineInput.fromJson(Map<String, dynamic> j) =>
-      OrderLineInput(j['product_id'] as String, _i(j['quantity']));
+      OrderLineInput(j['product_id'] as String, _i(j['quantity']), rate: j['rate'] == null ? null : _d(j['rate']));
 }
 
 /// An order captured on the phone that has not reached the server yet.
@@ -185,6 +282,8 @@ class PendingOrder {
   final String id; // client-generated UUID → idempotent submit
   final String partyId;
   final String? vehicleId;
+  final String? driverId;
+  final String invoiceCategory;
   final String? notes;
   final List<OrderLineInput> items;
   final DateTime orderDatetime; // UTC, captured at submit
@@ -195,6 +294,8 @@ class PendingOrder {
     required this.id,
     required this.partyId,
     required this.vehicleId,
+    this.driverId,
+    this.invoiceCategory = InvoiceCategory.general,
     required this.notes,
     required this.items,
     required this.orderDatetime,
@@ -206,6 +307,8 @@ class PendingOrder {
         id: id,
         partyId: partyId,
         vehicleId: vehicleId,
+        driverId: driverId,
+        invoiceCategory: invoiceCategory,
         notes: notes,
         items: items,
         orderDatetime: orderDatetime,
@@ -217,6 +320,8 @@ class PendingOrder {
         'id': id,
         'party_id': partyId,
         'vehicle_id': vehicleId,
+        'driver_id': driverId,
+        'invoice_category': invoiceCategory,
         'notes': notes,
         'items': items.map((e) => e.toJson()).toList(),
         'order_datetime': orderDatetime.toIso8601String(),
@@ -228,6 +333,8 @@ class PendingOrder {
         id: j['id'] as String,
         partyId: j['party_id'] as String,
         vehicleId: j['vehicle_id'] as String?,
+        driverId: j['driver_id'] as String?,
+        invoiceCategory: j['invoice_category'] as String? ?? InvoiceCategory.general,
         notes: j['notes'] as String?,
         items: (j['items'] as List).map((e) => OrderLineInput.fromJson(Map<String, dynamic>.from(e as Map))).toList(),
         orderDatetime: _t(j['order_datetime']),
@@ -240,6 +347,13 @@ class PendingOrder {
 class OrderSummary {
   final String id;
   final String orderNo;
+  final String invoiceNo;
+  final String invoiceCategory;
+  final String? driverId;
+  final String? driverName;
+  final double subtotal;
+  final double gstAmount;
+  final bool hasRateOverride;
   final DateTime orderDatetime;
   final String partyId;
   final String partyName;
@@ -258,6 +372,13 @@ class OrderSummary {
   const OrderSummary({
     required this.id,
     required this.orderNo,
+    required this.invoiceNo,
+    required this.invoiceCategory,
+    this.driverId,
+    this.driverName,
+    required this.subtotal,
+    required this.gstAmount,
+    required this.hasRateOverride,
     required this.orderDatetime,
     required this.partyId,
     required this.partyName,
@@ -278,9 +399,18 @@ class OrderSummary {
       ? null
       : (vehicleLabel == null || vehicleLabel!.isEmpty ? vehicleNumber : '$vehicleNumber · $vehicleLabel');
 
+  bool get isGst => invoiceCategory == InvoiceCategory.gst;
+
   factory OrderSummary.fromJson(Map<String, dynamic> j) => OrderSummary(
         id: j['id'] as String,
         orderNo: j['order_no'] as String,
+        invoiceNo: j['invoice_no'] as String? ?? '',
+        invoiceCategory: j['invoice_category'] as String? ?? InvoiceCategory.general,
+        driverId: j['driver_id'] as String?,
+        driverName: j['driver_name'] as String?,
+        subtotal: _d(j['subtotal']),
+        gstAmount: _d(j['gst_amount']),
+        hasRateOverride: j['has_rate_override'] as bool? ?? false,
         orderDatetime: _t(j['order_datetime']),
         partyId: j['party_id'] as String,
         partyName: j['party_name'] as String,
@@ -300,6 +430,13 @@ class OrderSummary {
   Map<String, dynamic> toJson() => {
         'id': id,
         'order_no': orderNo,
+        'invoice_no': invoiceNo,
+        'invoice_category': invoiceCategory,
+        'driver_id': driverId,
+        'driver_name': driverName,
+        'subtotal': subtotal,
+        'gst_amount': gstAmount,
+        'has_rate_override': hasRateOverride,
         'order_datetime': orderDatetime.toIso8601String(),
         'party_id': partyId,
         'party_name': partyName,
@@ -321,19 +458,25 @@ class OrderItem {
   final String productId;
   final String productName;
   final String unit;
+  final String? hsnCode;
   final int quantity;
   final double rate;
+  final double? standardRate;
   final double amount;
   final bool isDefaultRate;
+  final bool isRateOverride;
 
   const OrderItem({
     required this.productId,
     required this.productName,
     required this.unit,
+    this.hsnCode,
     required this.quantity,
     required this.rate,
+    this.standardRate,
     required this.amount,
     required this.isDefaultRate,
+    this.isRateOverride = false,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> j) {
@@ -342,10 +485,13 @@ class OrderItem {
       productId: j['product_id'] as String,
       productName: p?['name'] as String? ?? '?',
       unit: p?['unit'] as String? ?? '',
+      hsnCode: p?['hsn_code'] as String?,
       quantity: _i(j['quantity']),
       rate: _d(j['rate']),
+      standardRate: j['standard_rate'] == null ? null : _d(j['standard_rate']),
       amount: _d(j['amount']),
       isDefaultRate: j['is_default_rate'] as bool? ?? false,
+      isRateOverride: j['is_rate_override'] as bool? ?? false,
     );
   }
 }
@@ -361,6 +507,19 @@ class StatusChange {
 class OrderDetail {
   final String id;
   final String orderNo;
+  final String invoiceNo;
+  final String invoiceCategory;
+  final String? partyAddress;
+  final String? partyGstin;
+  final String? driverId;
+  final String? driverName;
+  final String? vehicleNumber;
+  final double gstRate;
+  final double subtotal;
+  final double cgstAmount;
+  final double sgstAmount;
+  final double roundOff;
+  final bool hasRateOverride;
   final DateTime orderDatetime;
   final String partyId;
   final String partyName;
@@ -381,6 +540,19 @@ class OrderDetail {
   const OrderDetail({
     required this.id,
     required this.orderNo,
+    required this.invoiceNo,
+    required this.invoiceCategory,
+    this.partyAddress,
+    this.partyGstin,
+    this.driverId,
+    this.driverName,
+    this.vehicleNumber,
+    required this.gstRate,
+    required this.subtotal,
+    required this.cgstAmount,
+    required this.sgstAmount,
+    required this.roundOff,
+    required this.hasRateOverride,
     required this.orderDatetime,
     required this.partyId,
     required this.partyName,
@@ -412,9 +584,24 @@ class OrderDetail {
           (m['changer'] as Map?)?['full_name'] as String?);
     }).toList()
       ..sort((a, b) => a.changedAt.compareTo(b.changedAt));
+    final party = j['parties'] as Map?;
+    final driver = j['drivers'] as Map?;
     return OrderDetail(
       id: j['id'] as String,
       orderNo: j['order_no'] as String,
+      invoiceNo: j['invoice_no'] as String? ?? '',
+      invoiceCategory: j['invoice_category'] as String? ?? InvoiceCategory.general,
+      partyAddress: party?['address'] as String?,
+      partyGstin: party?['gstin'] as String?,
+      driverId: j['driver_id'] as String?,
+      driverName: driver?['name'] as String?,
+      vehicleNumber: v?['vehicle_number'] as String?,
+      gstRate: _d(j['gst_rate']),
+      subtotal: _d(j['subtotal']),
+      cgstAmount: _d(j['cgst_amount']),
+      sgstAmount: _d(j['sgst_amount']),
+      roundOff: _d(j['round_off']),
+      hasRateOverride: j['has_rate_override'] as bool? ?? false,
       orderDatetime: _t(j['order_datetime']),
       partyId: j['party_id'] as String,
       partyName: (j['parties'] as Map?)?['name'] as String? ?? '?',
@@ -433,6 +620,8 @@ class OrderDetail {
       history: history,
     );
   }
+
+  bool get isGst => invoiceCategory == InvoiceCategory.gst;
 }
 
 /// Row from order_totals().
@@ -457,8 +646,23 @@ class OrderFilters {
   final String? userId;
   final String? status;
   final String? search;
+  final String? driverId; // 'none' = No driver
+  final String? category;
+  final bool? rateOverride;
 
-  const OrderFilters({this.fromDate, this.toDate, this.partyId, this.productId, this.vehicleId, this.userId, this.status, this.search});
+  const OrderFilters({
+    this.fromDate,
+    this.toDate,
+    this.partyId,
+    this.productId,
+    this.vehicleId,
+    this.userId,
+    this.status,
+    this.search,
+    this.driverId,
+    this.category,
+    this.rateOverride,
+  });
 
   static String _date(DateTime d) => d.toIso8601String().substring(0, 10);
 
@@ -470,6 +674,9 @@ class OrderFilters {
         if (vehicleId != null) 'vehicle_ids': [vehicleId],
         if (userId != null) 'user_ids': [userId],
         if (status != null) 'statuses': [status],
+        if (driverId != null) 'driver_ids': [driverId],
+        if (category != null) 'categories': [category],
+        if (rateOverride != null) 'rate_override': rateOverride,
         if (search != null && search!.trim().isNotEmpty) 'search': search!.trim(),
       };
 
@@ -482,6 +689,9 @@ class OrderFilters {
     Object? userId = _keep,
     Object? status = _keep,
     Object? search = _keep,
+    Object? driverId = _keep,
+    Object? category = _keep,
+    Object? rateOverride = _keep,
   }) =>
       OrderFilters(
         fromDate: fromDate == _keep ? this.fromDate : fromDate as DateTime?,
@@ -492,6 +702,9 @@ class OrderFilters {
         userId: userId == _keep ? this.userId : userId as String?,
         status: status == _keep ? this.status : status as String?,
         search: search == _keep ? this.search : search as String?,
+        driverId: driverId == _keep ? this.driverId : driverId as String?,
+        category: category == _keep ? this.category : category as String?,
+        rateOverride: rateOverride == _keep ? this.rateOverride : rateOverride as bool?,
       );
 }
 

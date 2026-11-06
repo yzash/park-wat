@@ -22,7 +22,10 @@ vercel.json              web admin hosting
 - **Login**: user ID + password. Behind the scenes Supabase Auth uses `<userid>@parker.local` (passwords bcrypt-hashed by Supabase Auth). No self-signup; admins create users.
 - **Roles** are rows in `roles` (`admin`, `order_taker`) — add a Supervisor/Driver role with an `INSERT`, no schema change.
 - **Security**: row-level security on every table. Order takers can read only their own orders; master data is read-only for them. All order writes go through validated SQL functions (`submit_order`, `update_order`, `set_order_status`), so rules hold even if the app is tampered with. Admin-only edge functions verify the caller's token and role server-side. Only the public anon key ships in the APK.
-- **Rates are never typed**: the server copies the rate from the party's rate list (latest `effective_from` ≤ order date, else product default rate) into `order_items.rate` at save time. Later rate changes never alter past orders.
+- **Rates auto-fill** from the party's rate list (latest `effective_from` ≤ order date, else product default rate); the server copies the rate into `order_items.rate` at save time, so later rate changes never alter past orders. The order taker **can override** a line's rate (tap the rate); the list rate is kept in `standard_rate`, the line and order are flagged *Rate changed*, and admin can filter/export on it.
+- **Drivers** are their own master and dropdown (with *No driver*), alongside vehicles.
+- **Invoice type** per order: **General** (no tax) or **GST** (GST rate from Invoice settings, default 5%, split CGST/SGST; total rounded off to the rupee). Each type has its own number series assigned by the server when the order syncs: GST default `{n}/PWP/{fy}` → `1263/PWP/26-27`, starting from the number the admin sets; General `{n}` from 1. Invoice type and number are fixed once submitted.
+- **Invoice PDF** (order screen → Tax invoice PDF / Invoice PDF), for the order taker on their own orders and for admin: GST invoices follow the client's tax-invoice layout (company GSTIN/PAN, buyer name, address, GSTIN + state from the GSTIN, HSN, CGST/SGST, HSN tax summary, amounts in words); General invoices show party name and address only. Empty party fields are left blank. Date **and time** are printed. Downloads on web; share sheet (WhatsApp, print…) on Android.
 - **Order numbers**: `PWP-2026-000123`, per-year counter, gap-free, assigned by the database.
 - **Offline**: products/parties/vehicles/rates are cached on the phone; a new order is written to a local queue first, then synced (on reconnect, app resume, every minute). The phone generates the order id, so a retried sync never creates a duplicate. Queued orders show a **Pending sync** badge.
 - **Audit**: `created_at/by` are immutable (trigger-enforced), `updated_at/by` on every edit, every master-data and order change is copied to `audit_log`, every status change to `order_status_log`. Users and masters are soft-deleted (`is_active`).
@@ -49,7 +52,10 @@ vercel.json              web admin hosting
 | FR-15 | Status lifecycle Submitted → Delivered / Cancelled | Done (admin; logged) |
 | FR-16 | Change own password | Done |
 | FR-17 | Audit log | Data captured in `audit_log` (admin read-only); no viewer screen yet |
-| FR-18 | Rate override by order taker | Not built — waiting on open question |
+| FR-18 | Rate override by order taker | Done — no approval step; flagged *Rate changed* for admin (filter, export) |
+| v1.1 | Drivers master + dropdown | Done (filters, summary, export) |
+| v1.1 | General / GST invoice categories, series, PDF invoice | Done |
+| v1.1 | Time shown on every order (app, admin, invoice, export) | Done |
 | FR-19 | Daily summary push (WhatsApp/email) | Not built (Could) |
 
 ## Go-live runbook
@@ -128,7 +134,7 @@ export SUPABASE_URL=$API_URL SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY SUPABAS
 node create-user.mjs admin "Plant Admin" admin admin1234
 node create-user.mjs ravi "Ravi Kumar" order_taker ravi1234
 node create-user.mjs sunil "Sunil Joshi" order_taker sunil1234
-node --test backend.test.mjs   # 14 integration tests: RLS, rates, idempotent sync, filters, import, users, export
+node --test backend.test.mjs   # 20 integration tests: RLS, rates, sync, GST/invoice series, overrides, drivers, import, users, export
 
 cd ../app
 flutter test
@@ -140,6 +146,9 @@ flutter run -d chrome --dart-define=SUPABASE_URL=$API_URL --dart-define=SUPABASE
 ## Decisions and assumptions
 
 - **On-device storage** uses `shared_preferences` (JSON) instead of Drift/SQLite: the data is small (masters + a handful of queued orders), it works identically on Android and web, and it avoids code generation. Swap in Drift if the party list grows into the tens of thousands.
+- **Party "GST name"** is implemented as the party's **GSTIN**; the state name/code on the invoice is derived from its first two digits. Products have an optional **HSN code**.
+- **Company details** on invoices (name, address, GSTIN, PAN, jurisdiction) are pre-filled from the sample invoice and editable in Admin → Invoice settings.
+- **Invoice numbers** never restart automatically; at the start of a financial year the admin can set the GST next number back to 1 (the `{fy}` part changes by itself, so numbers stay unique).
 - **Plant time zone** is assumed to be IST (Asia/Kolkata). Change `plant_tz()` (new migration) and `AppConfig.plantUtcOffset` if not.
 - **Order number** format `PWP-YYYY-NNNNNN`, counter restarts each year.
 - **Edits**: an order taker can edit their own order while it is Submitted (online only). Lines already on the order keep their saved rate; new lines (or a party change) take the current rate. Only admin changes status; cancel keeps the record.
@@ -149,4 +158,4 @@ flutter run -d chrome --dart-define=SUPABASE_URL=$API_URL --dart-define=SUPABASE
 
 ## Open questions (from the PRD) still to confirm with Parker Water
 
-Quantity slabs / date-based rates, rate override by order takers, statuses beyond Delivered/Cancelled (Paid?), driver role, Excel template requirements, APK vs Play internal track, admin domain, real data volumes, Hindi/Gujarati in v1.
+Quantity slabs / date-based rates, statuses beyond Delivered/Cancelled (Paid?), driver role, Excel template requirements, APK vs Play internal track, admin domain, real data volumes, Hindi/Gujarati in v1.

@@ -14,7 +14,7 @@ class ImportData {
 
 const partiesSheet = 'Parties';
 const ratesSheet = 'Rates';
-const _partyCols = ['Name', 'Contact Name', 'Phone', 'Address'];
+const _partyCols = ['Name', 'Contact Name', 'Phone', 'Address', 'GSTIN'];
 const _rateCols = ['Party Name', 'Product Name', 'Rate', 'Effective From'];
 
 String _pad(int n) => n.toString().padLeft(2, '0');
@@ -64,7 +64,7 @@ ImportData parseImport(Uint8List bytes) {
     warnings.add('No "$partiesSheet" or "$ratesSheet" sheet found. Download the template to see the expected layout.');
   }
   final parties = [
-    for (final r in rows(p)) {'name': at(r, 0), 'contact_name': at(r, 1), 'phone': at(r, 2), 'address': at(r, 3)},
+    for (final r in rows(p)) {'name': at(r, 0), 'contact_name': at(r, 1), 'phone': at(r, 2), 'address': at(r, 3), 'gstin': at(r, 4)},
   ];
   final rates = [
     for (final r in rows(rs))
@@ -79,7 +79,13 @@ Uint8List buildTemplate({List<String> productNames = const []}) {
   book.rename(def, partiesSheet);
   final ps = book[partiesSheet];
   ps.appendRow(_partyCols.map((c) => xl.TextCellValue(c)).toList());
-  ps.appendRow([xl.TextCellValue('Example Traders'), xl.TextCellValue('Ramesh Shah'), xl.TextCellValue('9876543210'), xl.TextCellValue('Ahmedabad')]);
+  ps.appendRow([
+    xl.TextCellValue('Example Traders'),
+    xl.TextCellValue('Ramesh Shah'),
+    xl.TextCellValue('9876543210'),
+    xl.TextCellValue('Ahmedabad'),
+    xl.TextCellValue(''),
+  ]);
   final rs = book[ratesSheet];
   rs.appendRow(_rateCols.map((c) => xl.TextCellValue(c)).toList());
   final today = DateTime.now();
@@ -88,7 +94,7 @@ Uint8List buildTemplate({List<String> productNames = const []}) {
     rs.appendRow([xl.TextCellValue('Example Traders'), xl.TextCellValue(name), xl.DoubleCellValue(0), xl.TextCellValue(date)]);
   }
   for (final s in [ps, rs]) {
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < 5; i++) {
       s.setColumnWidth(i, 24);
     }
   }

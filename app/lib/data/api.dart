@@ -98,12 +98,16 @@ class Api {
       _all('vehicles', order: 'vehicle_number'),
       _all('parties', order: 'name'),
       _all('current_party_rates', select: 'party_id,product_id,rate,effective_from'),
+      _all('drivers', order: 'name'),
+      _all('app_settings'),
     ]);
     return {
       'products': r[0],
       'vehicles': r[1],
       'parties': r[2],
       'rates': r[3],
+      'drivers': r[4],
+      'settings': r[5].isEmpty ? null : r[5].first,
       'fetched_at': DateTime.now().toUtc().toIso8601String(),
     };
   }
@@ -112,9 +116,26 @@ class Api {
   Future<List<Vehicle>> vehicles() async =>
       (await _all('vehicles', order: 'vehicle_number')).map(Vehicle.fromJson).toList();
   Future<List<Party>> parties() async => (await _all('parties', order: 'name')).map(Party.fromJson).toList();
+  Future<List<Driver>> drivers() async => (await _all('drivers', order: 'name')).map(Driver.fromJson).toList();
 
-  Future<void> saveProduct({String? id, required String name, required String unit, required double defaultRate, required bool isActive}) async {
-    final row = {'name': name.trim(), 'unit': unit.trim(), 'default_rate': defaultRate, 'is_active': isActive};
+  Future<void> saveDriver({String? id, required String name, String? phone, required bool isActive}) async {
+    final row = {'name': name.trim(), 'phone': (phone ?? '').trim().isEmpty ? null : phone!.trim(), 'is_active': isActive};
+    id == null ? await _c.from('drivers').insert(row) : await _c.from('drivers').update(row).eq('id', id);
+  }
+
+  Future<AppSettings> settings() async => AppSettings.fromJson(await _c.from('app_settings').select().eq('id', 1).single());
+
+  Future<void> saveSettings(AppSettings s) => _c.from('app_settings').update(s.toJson()).eq('id', 1);
+
+  Future<void> saveProduct(
+      {String? id, required String name, required String unit, required double defaultRate, String? hsnCode, required bool isActive}) async {
+    final row = {
+      'name': name.trim(),
+      'unit': unit.trim(),
+      'default_rate': defaultRate,
+      'hsn_code': (hsnCode ?? '').trim().isEmpty ? null : hsnCode!.trim(),
+      'is_active': isActive,
+    };
     id == null ? await _c.from('products').insert(row) : await _c.from('products').update(row).eq('id', id);
   }
 
@@ -127,9 +148,17 @@ class Api {
     id == null ? await _c.from('vehicles').insert(row) : await _c.from('vehicles').update(row).eq('id', id);
   }
 
-  Future<Party> saveParty({String? id, required String name, String? contactName, String? phone, String? address, required bool isActive}) async {
+  Future<Party> saveParty(
+      {String? id, required String name, String? contactName, String? phone, String? address, String? gstin, required bool isActive}) async {
     String? n(String? s) => (s ?? '').trim().isEmpty ? null : s!.trim();
-    final row = {'name': name.trim(), 'contact_name': n(contactName), 'phone': n(phone), 'address': n(address), 'is_active': isActive};
+    final row = {
+      'name': name.trim(),
+      'contact_name': n(contactName),
+      'phone': n(phone),
+      'address': n(address),
+      'gstin': n(gstin)?.toUpperCase(),
+      'is_active': isActive,
+    };
     final saved = id == null
         ? await _c.from('parties').insert(row).select().single()
         : await _c.from('parties').update(row).eq('id', id).select().single();
@@ -180,6 +209,8 @@ class Api {
       'p_id': o.id,
       'p_party_id': o.partyId,
       'p_vehicle_id': o.vehicleId,
+      'p_driver_id': o.driverId,
+      'p_invoice_category': o.invoiceCategory,
       'p_notes': o.notes,
       'p_items': o.items.map((e) => e.toJson()).toList(),
       'p_order_datetime': o.orderDatetime.toIso8601String(),
@@ -187,11 +218,13 @@ class Api {
     return Map<String, dynamic>.from(res as Map);
   }
 
-  Future<Map<String, dynamic>> updateOrder(String id, {required String partyId, String? vehicleId, String? notes, required List<OrderLineInput> items}) async {
+  Future<Map<String, dynamic>> updateOrder(String id,
+      {required String partyId, String? vehicleId, String? driverId, String? notes, required List<OrderLineInput> items}) async {
     final res = await _c.rpc('update_order', params: {
       'p_id': id,
       'p_party_id': partyId,
       'p_vehicle_id': vehicleId,
+      'p_driver_id': driverId,
       'p_notes': notes,
       'p_items': items.map((e) => e.toJson()).toList(),
     });
@@ -214,9 +247,9 @@ class Api {
   Future<OrderDetail> getOrder(String id) async {
     final row = await _c
         .from('orders')
-        .select('*, parties(name), vehicles(vehicle_number,label), '
+        .select('*, parties(name, address, gstin), vehicles(vehicle_number,label), drivers(name), '
             'creator:users!orders_created_by_fkey(full_name), updater:users!orders_updated_by_fkey(full_name), '
-            'order_items(product_id, quantity, rate, amount, is_default_rate, products(name, unit)), '
+            'order_items(product_id, quantity, rate, standard_rate, amount, is_default_rate, is_rate_override, products(name, unit, hsn_code)), '
             'order_status_log(from_status, to_status, changed_at, changer:users!order_status_log_changed_by_fkey(full_name))')
         .eq('id', id)
         .single();

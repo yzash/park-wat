@@ -17,6 +17,8 @@ class MastersState extends ChangeNotifier {
   List<Product> products = [];
   List<Vehicle> vehicles = [];
   List<Party> parties = [];
+  List<Driver> drivers = [];
+  AppSettings settings = AppSettings.fallback;
   final Map<String, double> _rates = {}; // "$partyId|$productId" → rate
   DateTime? fetchedAt;
   bool loading = false;
@@ -27,6 +29,8 @@ class MastersState extends ChangeNotifier {
   List<Party> get activeParties => parties.where((p) => p.isActive).toList();
   List<Product> get activeProducts => products.where((p) => p.isActive).toList();
   List<Vehicle> get activeVehicles => vehicles.where((v) => v.isActive).toList();
+  List<Driver> get activeDrivers => drivers.where((d) => d.isActive).toList();
+  Driver? driver(String? id) => id == null ? null : drivers.where((d) => d.id == id).firstOrNull;
 
   Party? party(String? id) => id == null ? null : parties.where((p) => p.id == id).firstOrNull;
   Product? product(String? id) => id == null ? null : products.where((p) => p.id == id).firstOrNull;
@@ -46,6 +50,9 @@ class MastersState extends ChangeNotifier {
     products = l('products').map(Product.fromJson).toList();
     vehicles = l('vehicles').map(Vehicle.fromJson).toList();
     parties = l('parties').map(Party.fromJson).toList();
+    drivers = l('drivers').map(Driver.fromJson).toList();
+    final st = m['settings'];
+    if (st is Map) settings = AppSettings.fromJson(Map<String, dynamic>.from(st));
     _rates.clear();
     for (final r in l('rates')) {
       final rate = r['rate'];

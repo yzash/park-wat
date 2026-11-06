@@ -38,6 +38,7 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
   List<Product> _products = [];
   List<Vehicle> _vehicles = [];
   List<AppUser> _users = [];
+  List<Driver> _drivers = [];
 
   @override
   void initState() {
@@ -55,13 +56,14 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
   Future<void> _loadOptions() async {
     final api = context.read<Api>();
     try {
-      final r = await Future.wait([api.parties(), api.products(), api.vehicles(), api.users()]);
+      final r = await Future.wait([api.parties(), api.products(), api.vehicles(), api.users(), api.drivers()]);
       if (!mounted) return;
       setState(() {
         _parties = r[0] as List<Party>;
         _products = r[1] as List<Product>;
         _vehicles = r[2] as List<Vehicle>;
         _users = r[3] as List<AppUser>;
+        _drivers = r[4] as List<Driver>;
       });
     } catch (_) {}
   }
@@ -198,6 +200,35 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
         onClear: () => _apply(_f.copyWith(vehicleId: null)),
       ),
       _FilterChip(
+        icon: Icons.badge_outlined,
+        label: t.driver,
+        value: _f.driverId == 'none' ? t.noDriver : nameOf<Driver>(_drivers, (d) => d.id == _f.driverId, (d) => d.name),
+        onPick: () async {
+          final none = Driver(id: 'none', name: t.noDriver, isActive: true);
+          final d = await _pick<Driver>(t.driver, [none, ..._drivers], (d) => _inactive(d.name, d.isActive));
+          if (d != null) _apply(_f.copyWith(driverId: d.id));
+        },
+        onClear: () => _apply(_f.copyWith(driverId: null)),
+      ),
+      _FilterChip(
+        icon: Icons.receipt_outlined,
+        label: t.invoiceType,
+        value: _f.category == null ? null : (_f.category == InvoiceCategory.gst ? t.categoryGst : t.categoryGeneral),
+        onPick: () async {
+          final c = await _pick<String>(t.invoiceType, [InvoiceCategory.general, InvoiceCategory.gst],
+              (c) => c == InvoiceCategory.gst ? t.categoryGst : t.categoryGeneral);
+          if (c != null) _apply(_f.copyWith(category: c));
+        },
+        onClear: () => _apply(_f.copyWith(category: null)),
+      ),
+      FilterChip(
+        avatar: const Icon(Icons.price_change_outlined, size: 18),
+        label: Text(t.rateChanged),
+        selected: _f.rateOverride == true,
+        showCheckmark: false,
+        onSelected: (v) => _apply(_f.copyWith(rateOverride: v ? true : null)),
+      ),
+      _FilterChip(
         icon: Icons.person_outline,
         label: t.orderTaker,
         value: nameOf<AppUser>(_users, (u) => u.id == _f.userId, (u) => u.fullName),
@@ -250,6 +281,8 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
       'party': t.party,
       'product': t.product,
       'vehicle': t.vehicle,
+      'driver': t.driver,
+      'category': t.invoiceType,
       'user': t.orderTaker,
       'day': t.day,
     };
@@ -352,12 +385,14 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
             headingRowColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.surfaceContainerHigh),
             columns: [
               DataColumn(label: Text(t.orderNo)),
+              DataColumn(label: Text(t.invoiceNo)),
               DataColumn(label: Text(t.dateTime)),
               DataColumn(label: Text(t.party)),
               DataColumn(label: Text(t.products)),
               DataColumn(label: Text(t.quantity), numeric: true),
               DataColumn(label: Text(t.total), numeric: true),
               DataColumn(label: Text(t.vehicle)),
+              DataColumn(label: Text(t.driver)),
               DataColumn(label: Text(t.orderTaker)),
               DataColumn(label: Text(t.status)),
             ],
@@ -367,6 +402,11 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
                   onSelectChanged: (_) => _open(o),
                   cells: [
                     DataCell(Text(o.orderNo)),
+                    DataCell(Row(mainAxisSize: MainAxisSize.min, children: [
+                      Text(o.invoiceNo),
+                      const SizedBox(width: 6),
+                      CategoryChip(gst: o.isGst),
+                    ])),
                     DataCell(Text(fmtDateTime(o.orderDatetime))),
                     DataCell(ConstrainedBox(constraints: const BoxConstraints(maxWidth: 200), child: Text(o.partyName, overflow: TextOverflow.ellipsis))),
                     DataCell(ConstrainedBox(
@@ -374,8 +414,12 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
                       child: Tooltip(message: o.productsSummary ?? '', child: Text(o.productsSummary ?? '', overflow: TextOverflow.ellipsis)),
                     )),
                     DataCell(Text(number(o.totalQuantity))),
-                    DataCell(Text(money(o.totalAmount))),
+                    DataCell(Row(mainAxisSize: MainAxisSize.min, children: [
+                      if (o.hasRateOverride) ...[const RateChangedChip(), const SizedBox(width: 6)],
+                      Text(money(o.totalAmount)),
+                    ])),
                     DataCell(Text(o.vehicleNumber ?? t.noVehicle)),
+                    DataCell(Text(o.driverName ?? t.noDriver)),
                     DataCell(Text(o.createdByName ?? '')),
                     DataCell(StatusChip(o.status)),
                   ],
@@ -404,7 +448,10 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
           ]),
           subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(o.productsSummary ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text('${o.orderNo} · ${fmtDateTime(o.orderDatetime)} · ${o.vehicleNumber ?? t.noVehicle} · ${o.createdByName ?? ''}',
+            Text(
+                '${fmtDateTime(o.orderDatetime)} · ${t.invoiceShort} ${o.invoiceNo}${o.isGst ? ' (${t.categoryGst})' : ''}'
+                ' · ${o.vehicleNumber ?? t.noVehicle} · ${o.driverName ?? t.noDriver} · ${o.createdByName ?? ''}'
+                '${o.hasRateOverride ? ' · ${t.rateChanged}' : ''}',
                 style: theme.textTheme.bodySmall),
           ]),
           trailing: StatusChip(o.status),

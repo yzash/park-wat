@@ -415,7 +415,7 @@ abstract class AppLocalizations {
   /// No description provided for @importIntro.
   ///
   /// In en, this message translates to:
-  /// **'Upload an Excel file with a \"Parties\" sheet (Name, Contact Name, Phone, Address) and/or a \"Rates\" sheet (Party Name, Product Name, Rate, Effective From). Existing parties are matched by name and updated; rates are added with their effective date.'**
+  /// **'Upload an Excel file with a \"Parties\" sheet (Name, Contact Name, Phone, Address, GSTIN) and/or a \"Rates\" sheet (Party Name, Product Name, Rate, Effective From). Existing parties are matched by name and updated; rates are added with their effective date.'**
   String get importIntro;
 
   /// No description provided for @importNow.
@@ -757,7 +757,7 @@ abstract class AppLocalizations {
   /// No description provided for @rateListHelp.
   ///
   /// In en, this message translates to:
-  /// **'Tap a product to set this party\'s rate. A new rate applies to orders from its effective date; older orders keep the rate they were saved with.'**
+  /// **'Tap a product to set this party\'\'s rate. A new rate applies to orders from its effective date; older orders keep the rate they were saved with.'**
   String get rateListHelp;
 
   /// No description provided for @reactivate.
@@ -1131,6 +1131,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Increase'**
   String get increase;
+
+  /// No description provided for @addDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Add driver'**
+  String get addDriver;
+
+  /// No description provided for @editDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit driver'**
+  String get editDriver;
+
+  /// No description provided for @drivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Drivers'**
+  String get drivers;
+
+  /// No description provided for @driversHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver list for the order form'**
+  String get driversHelp;
+
+  /// No description provided for @driver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get driver;
+
+  /// No description provided for @noDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'No driver'**
+  String get noDriver;
+
+  /// No description provided for @selectDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Select driver'**
+  String get selectDriver;
+
+  /// No description provided for @errDriverRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a driver (or No driver)'**
+  String get errDriverRequired;
+
+  /// No description provided for @invoiceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice type'**
+  String get invoiceType;
+
+  /// No description provided for @categoryGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get categoryGeneral;
+
+  /// No description provided for @categoryGst.
+  ///
+  /// In en, this message translates to:
+  /// **'GST'**
+  String get categoryGst;
+
+  /// No description provided for @invoiceTypeFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice type can\'\'t be changed after the order is submitted.'**
+  String get invoiceTypeFixed;
+
+  /// No description provided for @changeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Change rate'**
+  String get changeRate;
+
+  /// No description provided for @useListRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Use list rate'**
+  String get useListRate;
+
+  /// No description provided for @rateChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate changed'**
+  String get rateChanged;
+
+  /// No description provided for @gst.
+  ///
+  /// In en, this message translates to:
+  /// **'GST'**
+  String get gst;
+
+  /// No description provided for @invoiceNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice no'**
+  String get invoiceNo;
+
+  /// No description provided for @invoiceShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Inv'**
+  String get invoiceShort;
+
+  /// No description provided for @invoicePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice PDF'**
+  String get invoicePdf;
+
+  /// No description provided for @downloadInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice PDF'**
+  String get downloadInvoice;
+
+  /// No description provided for @downloadTaxInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax invoice PDF'**
+  String get downloadTaxInvoice;
+
+  /// No description provided for @taxableValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxable value'**
+  String get taxableValue;
+
+  /// No description provided for @roundOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Round off'**
+  String get roundOff;
+
+  /// No description provided for @invoiceSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice settings'**
+  String get invoiceSettings;
+
+  /// No description provided for @invoiceSettingsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Company details, GST rate, invoice number series'**
+  String get invoiceSettingsHelp;
+
+  /// No description provided for @companyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Company details (printed on invoices)'**
+  String get companyDetails;
+
+  /// No description provided for @companyNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Company name'**
+  String get companyNameLabel;
+
+  /// No description provided for @gstin.
+  ///
+  /// In en, this message translates to:
+  /// **'GSTIN'**
+  String get gstin;
+
+  /// No description provided for @pan.
+  ///
+  /// In en, this message translates to:
+  /// **'PAN'**
+  String get pan;
+
+  /// No description provided for @jurisdiction.
+  ///
+  /// In en, this message translates to:
+  /// **'Jurisdiction (city)'**
+  String get jurisdiction;
+
+  /// No description provided for @gstInvoices.
+  ///
+  /// In en, this message translates to:
+  /// **'GST invoices'**
+  String get gstInvoices;
+
+  /// No description provided for @generalInvoices.
+  ///
+  /// In en, this message translates to:
+  /// **'General invoices'**
+  String get generalInvoices;
+
+  /// No description provided for @gstRatePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'GST rate'**
+  String get gstRatePercent;
+
+  /// No description provided for @gstRateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Split equally into CGST and SGST'**
+  String get gstRateHelp;
+
+  /// No description provided for @seriesFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Number format'**
+  String get seriesFormat;
+
+  /// No description provided for @seriesFormatHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'\'{n}\' = number, \'{fy}\' = financial year (26-27), \'{yyyy}\' = year'**
+  String get seriesFormatHelp;
+
+  /// No description provided for @nextNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Next number'**
+  String get nextNumber;
+
+  /// No description provided for @formatNeedsN.
+  ///
+  /// In en, this message translates to:
+  /// **'Must contain \'{n}\''**
+  String get formatNeedsN;
+
+  /// No description provided for @seriesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers are given out in order when orders reach the server. Set the next number to continue an existing invoice book.'**
+  String get seriesNote;
+
+  /// No description provided for @hsnCode.
+  ///
+  /// In en, this message translates to:
+  /// **'HSN code (optional)'**
+  String get hsnCode;
+
+  /// No description provided for @hsnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed on GST invoices'**
+  String get hsnHelp;
+
+  /// No description provided for @gstinOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'GSTIN (optional)'**
+  String get gstinOptional;
+
+  /// No description provided for @gstinHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed on GST invoices; state is taken from the first two digits'**
+  String get gstinHelp;
+
+  /// No description provided for @gstinInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'15 characters, starting with the 2-digit state code'**
+  String get gstinInvalid;
+
+  /// No description provided for @categoryGstWithRate.
+  ///
+  /// In en, this message translates to:
+  /// **'GST {rate}%'**
+  String categoryGstWithRate(String rate);
+
+  /// No description provided for @listRateIs.
+  ///
+  /// In en, this message translates to:
+  /// **'List rate {rate}'**
+  String listRateIs(String rate);
+
+  /// No description provided for @rateChangedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed from {rate}'**
+  String rateChangedFrom(String rate);
+
+  /// No description provided for @invoiceNoIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice {no}'**
+  String invoiceNoIs(String no);
+
+  /// No description provided for @cgstAt.
+  ///
+  /// In en, this message translates to:
+  /// **'CGST @ {rate}%'**
+  String cgstAt(String rate);
+
+  /// No description provided for @sgstAt.
+  ///
+  /// In en, this message translates to:
+  /// **'SGST @ {rate}%'**
+  String sgstAt(String rate);
+
+  /// No description provided for @nextInvoiceWillBe.
+  ///
+  /// In en, this message translates to:
+  /// **'Next invoice: {no}'**
+  String nextInvoiceWillBe(String no);
 }
 
 class _AppLocalizationsDelegate

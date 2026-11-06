@@ -53,7 +53,7 @@
   "historyCreated": "Order submitted",
   "importExcel": "Import from Excel",
   "importHelp": "Bulk-load parties and rate lists",
-  "importIntro": "Upload an Excel file with a \"Parties\" sheet (Name, Contact Name, Phone, Address) and/or a \"Rates\" sheet (Party Name, Product Name, Rate, Effective From). Existing parties are matched by name and updated; rates are added with their effective date.",
+  "importIntro": "Upload an Excel file with a \"Parties\" sheet (Name, Contact Name, Phone, Address, GSTIN) and/or a \"Rates\" sheet (Party Name, Product Name, Rate, Effective From). Existing parties are matched by name and updated; rates are added with their effective date.",
   "importNow": "Import",
   "importReadError": "Could not read that file. Use the .xlsx template.",
   "inactive": "Inactive",
@@ -110,7 +110,7 @@
   "quantity": "Qty",
   "rateHistory": "Rate history",
   "rateList": "Rate List",
-  "rateListHelp": "Tap a product to set this party's rate. A new rate applies to orders from its effective date; older orders keep the rate they were saved with.",
+  "rateListHelp": "Tap a product to set this party''s rate. A new rate applies to orders from its effective date; older orders keep the rate they were saved with.",
   "reactivate": "Reactivate",
   "refresh": "Refresh",
   "remove": "Remove",
@@ -344,5 +344,105 @@
     }
   },
   "decrease": "Decrease",
-  "increase": "Increase"
+  "increase": "Increase",
+  "addDriver": "Add driver",
+  "editDriver": "Edit driver",
+  "drivers": "Drivers",
+  "driversHelp": "Driver list for the order form",
+  "driver": "Driver",
+  "noDriver": "No driver",
+  "selectDriver": "Select driver",
+  "errDriverRequired": "Choose a driver (or No driver)",
+  "invoiceType": "Invoice type",
+  "categoryGeneral": "General",
+  "categoryGst": "GST",
+  "invoiceTypeFixed": "Invoice type can''t be changed after the order is submitted.",
+  "changeRate": "Change rate",
+  "useListRate": "Use list rate",
+  "rateChanged": "Rate changed",
+  "gst": "GST",
+  "invoiceNo": "Invoice no",
+  "invoiceShort": "Inv",
+  "invoicePdf": "Invoice PDF",
+  "downloadInvoice": "Invoice PDF",
+  "downloadTaxInvoice": "Tax invoice PDF",
+  "taxableValue": "Taxable value",
+  "roundOff": "Round off",
+  "invoiceSettings": "Invoice settings",
+  "invoiceSettingsHelp": "Company details, GST rate, invoice number series",
+  "companyDetails": "Company details (printed on invoices)",
+  "companyNameLabel": "Company name",
+  "gstin": "GSTIN",
+  "pan": "PAN",
+  "jurisdiction": "Jurisdiction (city)",
+  "gstInvoices": "GST invoices",
+  "generalInvoices": "General invoices",
+  "gstRatePercent": "GST rate",
+  "gstRateHelp": "Split equally into CGST and SGST",
+  "seriesFormat": "Number format",
+  "seriesFormatHelp": "'{n}' = number, '{fy}' = financial year (26-27), '{yyyy}' = year",
+  "nextNumber": "Next number",
+  "formatNeedsN": "Must contain '{n}'",
+  "seriesNote": "Numbers are given out in order when orders reach the server. Set the next number to continue an existing invoice book.",
+  "hsnCode": "HSN code (optional)",
+  "hsnHelp": "Printed on GST invoices",
+  "gstinOptional": "GSTIN (optional)",
+  "gstinHelp": "Printed on GST invoices; state is taken from the first two digits",
+  "gstinInvalid": "15 characters, starting with the 2-digit state code",
+  "categoryGstWithRate": "GST {rate}%",
+  "@categoryGstWithRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "listRateIs": "List rate {rate}",
+  "@listRateIs": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "rateChangedFrom": "Changed from {rate}",
+  "@rateChangedFrom": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "invoiceNoIs": "Invoice {no}",
+  "@invoiceNoIs": {
+    "placeholders": {
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "cgstAt": "CGST @ {rate}%",
+  "@cgstAt": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "sgstAt": "SGST @ {rate}%",
+  "@sgstAt": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "nextInvoiceWillBe": "Next invoice: {no}",
+  "@nextInvoiceWillBe": {
+    "placeholders": {
+      "no": {
+        "type": "String"
+      }
+    }
+  }
 }

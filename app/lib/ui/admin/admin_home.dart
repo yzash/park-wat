@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../util/l10n.dart';
 import '../widgets/common.dart';
 import 'all_orders_page.dart';
+import 'drivers_page.dart';
 import 'import_page.dart';
+import 'invoice_settings_page.dart';
 import 'parties_page.dart';
 import 'products_page.dart';
 import 'users_page.dart';
@@ -21,6 +23,8 @@ class AdminHome extends StatelessWidget {
       (Icons.storefront_outlined, t.parties, t.partiesHelp, () => const PartiesPage()),
       (Icons.inventory_2_outlined, t.products, t.productsHelp, () => const ProductsPage()),
       (Icons.local_shipping_outlined, t.vehicles, t.vehiclesHelp, () => const VehiclesPage()),
+      (Icons.badge_outlined, t.drivers, t.driversHelp, () => const DriversPage()),
+      (Icons.receipt_long_outlined, t.invoiceSettings, t.invoiceSettingsHelp, () => const InvoiceSettingsPage()),
       (Icons.upload_file_outlined, t.importExcel, t.importHelp, () => const ImportPage()),
     ];
     return Scaffold(

@@ -51,10 +51,14 @@ class LocalStore {
   // ---- form defaults -------------------------------------------------------------
   String? lastPartyId(String uid) => _p.getString('last_party_$uid');
   String? lastVehicle(String uid) => _p.getString('last_vehicle_$uid'); // id or 'none'
+  String? lastDriver(String uid) => _p.getString('last_driver_$uid'); // id or 'none'
+  String? lastCategory(String uid) => _p.getString('last_category_$uid');
 
-  Future<void> setLastUsed(String uid, String partyId, String vehicle) async {
+  Future<void> setLastUsed(String uid, {required String partyId, required String vehicle, required String driver, required String category}) async {
     await _p.setString('last_party_$uid', partyId);
     await _p.setString('last_vehicle_$uid', vehicle);
+    await _p.setString('last_driver_$uid', driver);
+    await _p.setString('last_category_$uid', category);
   }
 
   /// Last order's lines per party → one-tap "Repeat last order".
