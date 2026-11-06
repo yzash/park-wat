@@ -49,3 +49,4 @@ app.*.map.json
 
 # Build config with real project URL/key (not secret, but environment-specific)
 config.json
+/android/build/
