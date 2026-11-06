@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+supabase/.branches
+supabase/.temp
+supabase/functions/.local/
+*.jks
+*.keystore
+key.properties
+.DS_Store
+.vercel
