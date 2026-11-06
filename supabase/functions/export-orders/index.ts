@@ -123,7 +123,8 @@ Deno.serve(handle(async (req) => {
   }
 
   const buf = await wb.xlsx.writeBuffer();
-  const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "");
+  // file name stamped in plant time (IST, UTC+5:30)
+  const stamp = new Date(Date.now() + 330 * 60_000).toISOString().slice(0, 16).replace(/[-:]/g, "").replace("T", "-");
   return new Response(buf, {
     headers: {
       ...corsHeaders,

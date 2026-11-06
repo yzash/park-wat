@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  app:
+    name: Flutter analyze & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  backend:
+    name: Database + edge functions integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Start local Supabase (applies migrations + seed)
+        run: supabase start -x studio,imgproxy,vector,logflare,realtime,storage-api,supavisor,mailpit,postgres-meta
+      - name: Serve edge functions
+        run: |
+          supabase functions serve > functions.log 2>&1 &
+          sleep 15
+      - name: Create test users and run tests
+        working-directory: scripts
+        run: |
+          npm ci || npm install
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          export SUPABASE_URL="$API_URL" SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" SUPABASE_ANON_KEY="$ANON_KEY"
+          node create-user.mjs admin "Plant Admin" admin admin1234
+          node create-user.mjs ravi "Ravi Kumar" order_taker ravi1234
+          node create-user.mjs sunil "Sunil Joshi" order_taker sunil1234
+          node --test backend.test.mjs
+      - if: failure()
+        run: cat functions.log || true

@@ -1,0 +1,348 @@
+{
+  "@@locale": "en",
+  "account": "Account",
+  "active": "Active",
+  "add": "Add",
+  "addParty": "Add party",
+  "addProduct": "Add product",
+  "addProducts": "Add products",
+  "addUser": "Add user",
+  "addVehicle": "Add vehicle",
+  "address": "Address",
+  "admin": "Admin",
+  "allDates": "All dates",
+  "allOrders": "All Orders",
+  "allOrdersHelp": "Every order, filters, summaries, Excel export",
+  "allProductsAdded": "All products are already on this order",
+  "allSynced": "All orders synced",
+  "appTitle": "Order Tracking",
+  "cancel": "Cancel",
+  "cancelOrder": "Cancel order",
+  "cancelOrderMessage": "The order will be kept but marked Cancelled. Continue?",
+  "changePassword": "Change password",
+  "chooseFile": "Choose .xlsx file",
+  "clearFilters": "Clear filters",
+  "companyName": "Parker Water Products",
+  "confirmPassword": "Confirm new password",
+  "contactName": "Contact name",
+  "create": "Create",
+  "currentPassword": "Current password",
+  "dateTime": "Date & time",
+  "day": "Day",
+  "deactivate": "Deactivate",
+  "defaultRate": "Default rate",
+  "defaultRateHelp": "Used only when a party has no rate for this product",
+  "details": "Details",
+  "discard": "Discard",
+  "discardOrder": "Discard order?",
+  "discardOrderMessage": "This order was rejected by the server and will be deleted from this phone.",
+  "done": "Done",
+  "downloadTemplate": "Download template",
+  "edit": "Edit",
+  "editProduct": "Edit product",
+  "editVehicle": "Edit vehicle",
+  "effectiveFrom": "Effective from",
+  "errPartyRequired": "Choose a party",
+  "errProductsRequired": "Add at least one product",
+  "errQuantityRequired": "Enter a quantity for every product",
+  "errVehicleRequired": "Choose a vehicle (or No vehicle)",
+  "exportExcel": "Export Excel",
+  "fullName": "Full name",
+  "group": "Group",
+  "history": "History",
+  "historyCreated": "Order submitted",
+  "importExcel": "Import from Excel",
+  "importHelp": "Bulk-load parties and rate lists",
+  "importIntro": "Upload an Excel file with a \"Parties\" sheet (Name, Contact Name, Phone, Address) and/or a \"Rates\" sheet (Party Name, Product Name, Rate, Effective From). Existing parties are matched by name and updated; rates are added with their effective date.",
+  "importNow": "Import",
+  "importReadError": "Could not read that file. Use the .xlsx template.",
+  "inactive": "Inactive",
+  "initialPassword": "Initial password",
+  "labelOptional": "Label (optional)",
+  "lastUpdated": "Last edited",
+  "logIn": "Log in",
+  "logOut": "Log out",
+  "loginHelp": "Forgot your password? Ask the admin to reset it.",
+  "logoutConfirm": "Log out of this phone?",
+  "markDelivered": "Mark delivered",
+  "markSubmitted": "Move back to Submitted",
+  "masterData": "Parties, products & rates",
+  "mastersNotLoaded": "Product and party lists are not on this phone yet. Connect to the internet once to download them.",
+  "myOrders": "My Orders",
+  "name": "Name",
+  "neverUpdated": "Not downloaded yet",
+  "newOrder": "New order",
+  "newPassword": "New password",
+  "noMatches": "No matches",
+  "noOrdersInRange": "No orders in this period",
+  "noOrdersMatch": "No orders match these filters",
+  "noOrdersToday": "No orders yet today.\nTap New order to add one.",
+  "noVehicle": "No vehicle",
+  "notes": "Notes",
+  "notesOptional": "Notes (optional)",
+  "nothingHereYet": "Nothing here yet",
+  "offline": "Offline — orders will sync when back online",
+  "ok": "OK",
+  "online": "Online",
+  "order": "Order",
+  "orderNo": "Order no",
+  "orderQueued": "Saved on phone",
+  "orderQueuedMessage": "No connection right now. The order is saved and will sync automatically (shown as Pending sync).",
+  "orderSaved": "Order submitted",
+  "orderTaker": "Order taker",
+  "orderUpdated": "Order updated",
+  "orders": "Orders",
+  "parties": "Parties",
+  "partiesHelp": "Customers, distributors and their rate lists",
+  "party": "Party",
+  "partyCreatedNowRates": "Party created. Set its rates in the Rate List tab.",
+  "partyName": "Party name",
+  "password": "Password",
+  "passwordChanged": "Password changed",
+  "passwordResetDone": "Password reset",
+  "passwordTooShort": "At least 8 characters",
+  "passwordsDontMatch": "Passwords do not match",
+  "pendingSync": "Pending sync",
+  "phone": "Phone",
+  "product": "Product",
+  "products": "Products",
+  "productsHelp": "Product master: name, unit, default rate",
+  "quantity": "Qty",
+  "rateHistory": "Rate history",
+  "rateList": "Rate List",
+  "rateListHelp": "Tap a product to set this party's rate. A new rate applies to orders from its effective date; older orders keep the rate they were saved with.",
+  "reactivate": "Reactivate",
+  "refresh": "Refresh",
+  "remove": "Remove",
+  "required": "Required",
+  "resetPassword": "Reset password",
+  "retry": "Retry",
+  "role": "Role",
+  "roleAdmin": "Admin",
+  "roleOrderTaker": "Order Taker",
+  "save": "Save",
+  "saveChanges": "Save changes",
+  "saved": "Saved",
+  "searchHint": "Type to search",
+  "searchOrders": "Order no, party, notes",
+  "selectParty": "Select party",
+  "selectVehicle": "Select vehicle",
+  "showingCached": "Offline — showing the last downloaded list",
+  "status": "Status",
+  "statusCancelled": "Cancelled",
+  "statusDelivered": "Delivered",
+  "statusSubmitted": "Submitted",
+  "submit": "Submit",
+  "summary": "Summary",
+  "syncFailed": "Sync failed",
+  "today": "Today",
+  "total": "Total",
+  "unit": "Unit",
+  "unitHint": "box, bottle, jar…",
+  "userId": "User ID",
+  "userIdHelp": "2–40 characters: letters, digits, . _ -",
+  "users": "Users",
+  "usersHelp": "Create logins, roles, reset passwords",
+  "vehicle": "Vehicle",
+  "vehicleLabelHint": "e.g. Tata Ace — Ramesh",
+  "vehicleNumber": "Vehicle number",
+  "vehicles": "Vehicles",
+  "vehiclesHelp": "Vehicle list for the order form",
+  "you": "You",
+  "addCount": "Add {count}",
+  "@addCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "byGroup": "By {group}",
+  "@byGroup": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "deactivateMessage": "{name} will no longer be able to log in. Their orders stay in the system. Continue?",
+  "@deactivateMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editOrderNo": "Edit {orderNo}",
+  "@editOrderNo": {
+    "placeholders": {
+      "orderNo": {
+        "type": "String"
+      }
+    }
+  },
+  "effectiveSince": "Since {date}",
+  "@effectiveSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exported": "Exported {file}",
+  "@exported": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "historyStatus": "{from} → {to}",
+  "@historyStatus": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "importDone": "Imported: {created} new parties, {updated} updated, {rates} rates saved",
+  "@importDone": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "rates": {
+        "type": "int"
+      }
+    }
+  },
+  "importErrors": "{count, plural, =1{1 row was skipped:} other{{count} rows were skipped:}}",
+  "@importErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importPreview": "Found {parties} parties and {rates} rate rows",
+  "@importPreview": {
+    "placeholders": {
+      "parties": {
+        "type": "int"
+      },
+      "rates": {
+        "type": "int"
+      }
+    }
+  },
+  "loadMore": "Load more ({shown} of {total})",
+  "@loadMore": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "logoutPendingWarning": "{count, plural, =1{1 order has} other{{count} orders have}} not synced yet. They stay on this phone and sync after you log in again as the same user. Log out anyway?",
+  "@logoutPendingWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ordersCount": "{count, plural, =0{No orders} =1{1 order} other{{count} orders}}",
+  "@ordersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingOrders": "{count, plural, =1{1 order waiting to sync} other{{count} orders waiting to sync}}",
+  "@pendingOrders": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ratePerUnit": "Rate per {unit}",
+  "@ratePerUnit": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "repeatLastOrder": "Repeat last order ({count, plural, =1{1 product} other{{count} products}})",
+  "@repeatLastOrder": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "showInactive": "Show inactive ({count})",
+  "@showInactive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusChangedTo": "Status changed to {status}",
+  "@statusChangedTo": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "totalItems": "{count, plural, =1{1 unit} other{{count} units}}",
+  "@totalItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "upcomingRate": "{rate} from {date}",
+  "@upcomingRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "updatedAt": "Updated {when}",
+  "@updatedAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "usingDefaultRate": "No party rate — uses default {rate}",
+  "@usingDefaultRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "decrease": "Decrease",
+  "increase": "Increase"
+}

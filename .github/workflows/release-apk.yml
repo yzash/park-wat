@@ -1,0 +1,57 @@
+name: Release APK
+
+# Push a tag like v1.0.0 to build a signed release APK and attach it to a GitHub Release.
+# Required repository secrets:
+#   SUPABASE_URL, SUPABASE_ANON_KEY          – production project (anon key is public by design)
+#   ANDROID_KEYSTORE_BASE64                  – base64 of the client's upload keystore (.jks)
+#   ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+      - name: Restore keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          echo "PWP_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+      - name: Build APK
+        env:
+          PWP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          PWP_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          PWP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          flutter pub get
+          VERSION="${GITHUB_REF_NAME#v}"
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+            ${{ startsWith(github.ref, 'refs/tags/v') && '--build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"' || '' }}
+          mv build/app/outputs/flutter-apk/app-release.apk "build/parker-orders-${GITHUB_REF_NAME}.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parker-orders-apk
+          path: app/build/parker-orders-*.apk
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/parker-orders-*.apk

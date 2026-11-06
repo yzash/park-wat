@@ -1,0 +1,37 @@
+name: Daily database backup
+
+# Daily encrypted pg_dump of the production database, kept 30 days as a private
+# workflow artifact (PRD: daily automated backup, 30-day retention).
+# Required repository secrets:
+#   SUPABASE_DB_URL       – Supabase → Project Settings → Database → connection string (session pooler, with password)
+#   BACKUP_PASSPHRASE     – long random passphrase; store it safely, it is needed to restore
+on:
+  schedule:
+    - cron: '41 20 * * *'   # 02:11 IST
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump and encrypt
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          STAMP=$(date -u +%Y%m%d-%H%M)
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --schema=public --schema=auth --no-owner --no-privileges -Fc -f "pwp-$STAMP.dump"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASSPHRASE" --symmetric --cipher-algo AES256 "pwp-$STAMP.dump"
+          rm "pwp-$STAMP.dump"
+          ls -la
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: pwp-*.dump.gpg
+          retention-days: 30
