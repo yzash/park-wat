@@ -19,7 +19,7 @@ val keyProps = Properties().apply {
 val releaseStoreFile: String? = keyProps.getProperty("storeFile") ?: System.getenv("PWP_KEYSTORE_PATH")
 
 android {
-    namespace = "`in`.parkerwater.parker_orders"
+    namespace = "com.parkerwater.orders"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "`in`.parkerwater.parker_orders"
+        applicationId = "com.parkerwater.orders"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

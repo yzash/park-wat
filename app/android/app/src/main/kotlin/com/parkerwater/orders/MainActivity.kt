@@ -1,4 +1,4 @@
-package `in`.parkerwater.parker_orders
+package com.parkerwater.orders
 
 import io.flutter.embedding.android.FlutterActivity
 
